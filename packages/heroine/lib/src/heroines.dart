@@ -197,10 +197,14 @@ class _HeroineState extends State<Heroine> with TickerProviderStateMixin {
   void _endFlight() {
     _placeholderSize = null;
     if (!mounted) return;
-    setState(() {
-      _manifest = null;
-      _sleightOfHand = null;
-    });
+
+    _manifest = null;
+    _sleightOfHand = null;
+
+    // setState(() {
+    //   _manifest = null;
+    //   _sleightOfHand = null;
+    // });
   }
 
   @override
