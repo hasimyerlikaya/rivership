@@ -102,20 +102,16 @@ class _DragDismissableState extends State<DragDismissable> {
   Offset _offset = Offset.zero;
   Velocity _velocity = Velocity.zero;
 
-  VoidCallback? get onDismiss =>
-      widget.onDismiss ??
-      (widget._popAsDismiss ? () => Navigator.maybePop(context) : null);
+  VoidCallback? get onDismiss => widget.onDismiss ?? (widget._popAsDismiss ? () => Navigator.maybePop(context) : null);
 
-  double get progress =>
-      switch ((widget.axisAffinity, widget.constrainToAxis)) {
+  double get progress => switch ((widget.axisAffinity, widget.constrainToAxis)) {
         (null, _) || (_, false) => _offset.distance / widget.threshold,
         (Axis.horizontal, true) => _offset.dx.abs() / widget.threshold,
         (Axis.vertical, true) => _offset.dy.abs() / widget.threshold,
       }
           .clamp(0, 1);
 
-  double dismissVelocity(Velocity velocity) =>
-      switch ((widget.axisAffinity, widget.constrainToAxis)) {
+  double dismissVelocity(Velocity velocity) => switch ((widget.axisAffinity, widget.constrainToAxis)) {
         (null, _) || (_, false) => velocity.pixelsPerSecond.distance,
         (Axis.horizontal, true) => velocity.pixelsPerSecond.dx.abs(),
         (Axis.vertical, true) => velocity.pixelsPerSecond.dy.abs(),
@@ -132,45 +128,19 @@ class _DragDismissableState extends State<DragDismissable> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onPanStart:
-          widget.axisAffinity == null && !widget._disabled ? _start : null,
-      onPanUpdate:
-          widget.axisAffinity == null && !widget._disabled ? _update : null,
-      onPanCancel:
-          widget.axisAffinity == null && !widget._disabled ? _cancel : null,
+      onPanStart: widget.axisAffinity == null && !widget._disabled ? _start : null,
+      onPanUpdate: widget.axisAffinity == null && !widget._disabled ? _update : null,
+      onPanCancel: widget.axisAffinity == null && !widget._disabled ? _cancel : null,
       onPanEnd: widget.axisAffinity == null && !widget._disabled ? _end : null,
-      onVerticalDragStart:
-          widget.axisAffinity == Axis.vertical && !widget._disabled
-              ? _start
-              : null,
-      onVerticalDragUpdate:
-          widget.axisAffinity == Axis.vertical && !widget._disabled
-              ? _update
-              : null,
-      onVerticalDragCancel:
-          widget.axisAffinity == Axis.vertical && !widget._disabled
-              ? _cancel
-              : null,
-      onVerticalDragEnd:
-          widget.axisAffinity == Axis.vertical && !widget._disabled
-              ? _end
-              : null,
-      onHorizontalDragStart:
-          widget.axisAffinity == Axis.horizontal && !widget._disabled
-              ? _start
-              : null,
-      onHorizontalDragUpdate:
-          widget.axisAffinity == Axis.horizontal && !widget._disabled
-              ? _update
-              : null,
-      onHorizontalDragCancel:
-          widget.axisAffinity == Axis.horizontal && !widget._disabled
-              ? _cancel
-              : null,
-      onHorizontalDragEnd:
-          widget.axisAffinity == Axis.horizontal && !widget._disabled
-              ? _end
-              : null,
+      onVerticalDragStart: widget.axisAffinity == Axis.vertical && !widget._disabled ? _start : null,
+      onVerticalDragUpdate: widget.axisAffinity == Axis.vertical && !widget._disabled ? _update : null,
+      onVerticalDragCancel: widget.axisAffinity == Axis.vertical && !widget._disabled ? _cancel : null,
+      onVerticalDragEnd: widget.axisAffinity == Axis.vertical && !widget._disabled ? _end : null,
+      onHorizontalDragStart: widget.axisAffinity == Axis.horizontal && !widget._disabled ? _start : null,
+      onHorizontalDragUpdate: widget.axisAffinity == Axis.horizontal && !widget._disabled ? _update : null,
+      onHorizontalDragCancel: widget.axisAffinity == Axis.horizontal && !widget._disabled ? _cancel : null,
+      onHorizontalDragEnd: widget.axisAffinity == Axis.horizontal && !widget._disabled ? _end : null,
+      behavior: HitTestBehavior.opaque,
       child: MotionBuilder(
         active: _dragStartOffset == null,
         motion: SpringMotion(widget.spring),
@@ -227,9 +197,7 @@ class _DragDismissableState extends State<DragDismissable> {
   }
 
   void _end(DragEndDetails details) {
-    if (ModalRoute.of(context)?.popDisposition ==
-            RoutePopDisposition.doNotPop &&
-        widget._popAsDismiss) {
+    if (ModalRoute.of(context)?.popDisposition == RoutePopDisposition.doNotPop && widget._popAsDismiss) {
       _cancel();
 
       return;
