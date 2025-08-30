@@ -148,16 +148,13 @@ class _HeroineState extends State<Heroine> with TickerProviderStateMixin {
   }
 
   bool _showsEmptyPlaceholderForFlight(_FlightManifest flight) {
-    return flight.direction == HeroFlightDirection.pop &&
-        flight.fromHero == this;
+    return flight.direction == HeroFlightDirection.pop && flight.fromHero == this;
   }
 
   @override
   Widget build(BuildContext context) {
     final flight = _manifest;
-    if (flight != null &&
-        widget.placeholderBuilder != null &&
-        _placeholderSize != null) {
+    if (flight != null && widget.placeholderBuilder != null && _placeholderSize != null) {
       return widget.placeholderBuilder!(
         context,
         _placeholderSize!,
@@ -217,10 +214,10 @@ class _HeroineState extends State<Heroine> with TickerProviderStateMixin {
       _manifest = null;
       _sleightOfHand = null;
     } else {
-      setState(() {
-        _manifest = null;
-        _sleightOfHand = null;
-      });
+      // setState(() {
+      //   _manifest = null;
+      //   _sleightOfHand = null;
+      // });
     }
   }
 
@@ -271,8 +268,7 @@ class _SleightOfHandBuilder extends StatelessWidget {
 
     if (placeholderSize case final size?) {
       return AnimatedBuilder(
-        animation:
-            sleightOfHand?.centerController ?? const AlwaysStoppedAnimation(0),
+        animation: sleightOfHand?.centerController ?? const AlwaysStoppedAnimation(0),
         builder: (context, child) {
           return Transform.translate(
             offset: sleightOfHand?.offset ?? Offset.zero,
@@ -405,19 +401,13 @@ class HeroineController extends NavigatorObserver {
     required Route<dynamic>? toRoute,
     required bool isUserGestureTransition,
   }) {
-    if (toRoute == fromRoute ||
-        toRoute is! PageRoute<dynamic> ||
-        fromRoute is! PageRoute<dynamic>) {
+    if (toRoute == fromRoute || toRoute is! PageRoute<dynamic> || fromRoute is! PageRoute<dynamic>) {
       return;
     }
     final newRouteAnimation = toRoute.animation!;
     final oldRouteAnimation = fromRoute.animation!;
     final HeroFlightDirection? flightType;
-    switch ((
-      isUserGestureTransition,
-      oldRouteAnimation.status,
-      newRouteAnimation.status
-    )) {
+    switch ((isUserGestureTransition, oldRouteAnimation.status, newRouteAnimation.status)) {
       case (true, _, _):
       case (_, AnimationStatus.reverse, _):
         flightType = HeroFlightDirection.pop;
@@ -447,14 +437,9 @@ class HeroineController extends NavigatorObserver {
     // immediately because their page's layout is still valid.
     // Unless due to directly
     // adding routes to the pages stack causing the route to never get laid out.
-    final fromRouteRenderBox =
-        toRoute.subtreeContext?.findRenderObject() as RenderBox?;
-    final hasValidSize = (fromRouteRenderBox?.hasSize ?? false) &&
-        fromRouteRenderBox!.size.isFinite;
-    if (isUserGestureTransition &&
-        flightType == HeroFlightDirection.pop &&
-        toRoute.maintainState &&
-        hasValidSize) {
+    final fromRouteRenderBox = toRoute.subtreeContext?.findRenderObject() as RenderBox?;
+    final hasValidSize = (fromRouteRenderBox?.hasSize ?? false) && fromRouteRenderBox!.size.isFinite;
+    if (isUserGestureTransition && flightType == HeroFlightDirection.pop && toRoute.maintainState && hasValidSize) {
       _startHeroTransition(
         fromRoute,
         toRoute,
@@ -643,13 +628,11 @@ class HeroineController extends NavigatorObserver {
     Iterable<Object> otherRouteHeroes,
   ) {
     final ownTag = heroine?.widget.tag;
-    final parentTag =
-        heroine?.context.findAncestorWidgetOfExactType<Heroine>()?.tag;
+    final parentTag = heroine?.context.findAncestorWidgetOfExactType<Heroine>()?.tag;
     if (parentTag == null || ownTag == null) return false;
 
     // If both the parent and the child are flying, then we don't support it.
-    return otherRouteHeroes.contains(parentTag) &&
-        otherRouteHeroes.contains(ownTag);
+    return otherRouteHeroes.contains(parentTag) && otherRouteHeroes.contains(ownTag);
   }
 
   void _handleFlightEnded(_FlightManifest manifest) {
@@ -734,9 +717,7 @@ extension on BuildContext {
           // considered for animation if it is part of the top-most route in
           // that nested Navigator and if that route is also a PageRoute.
           final heroRoute = ModalRoute.of(hero);
-          if (heroRoute != null &&
-              heroRoute is PageRoute &&
-              heroRoute.isCurrent) {
+          if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
             inviteHero(hero, tag);
           }
         }
