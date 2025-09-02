@@ -14,10 +14,8 @@ class _HeroineFlight {
 
   OverlayEntry? overlayEntry;
 
-  MotionController<Offset>? get centerController =>
-      manifest.controllingHero._centerController;
-  MotionController<Size>? get sizeController =>
-      manifest.controllingHero._sizeController;
+  MotionController<Offset>? get centerController => manifest.controllingHero._centerController;
+  MotionController<Size>? get sizeController => manifest.controllingHero._sizeController;
 
   void startFlight() {
     manifest.toHero._startFlight(manifest);
@@ -34,8 +32,7 @@ class _HeroineFlight {
     }
 
     final fromHeroVelocity = HeroineVelocity.of(manifest.fromHero.context);
-    manifest.routeAnimation
-        .addStatusListener(_onProgressAnimationStatusChanged);
+    manifest.routeAnimation.addStatusListener(_onProgressAnimationStatusChanged);
 
     centerController
       ?..motion = manifest.motion
@@ -55,8 +52,7 @@ class _HeroineFlight {
     // If we are diverting a user gesture transition to a non-user gesture
     // transition, we need to set the initial values of the controllers to
     // the values of the from hero to make sure the animation is smooth.
-    if (manifest.isUserGestureTransition &&
-        !newManifest.isUserGestureTransition) {
+    if (manifest.isUserGestureTransition && !newManifest.isUserGestureTransition) {
       centerController
         ?..value = newManifest.fromHeroLocation.center
         ..motion = manifest.motion;
@@ -66,8 +62,7 @@ class _HeroineFlight {
     }
 
     manifest.dispose();
-    manifest.routeAnimation
-        .removeStatusListener(_onProgressAnimationStatusChanged);
+    manifest.routeAnimation.removeStatusListener(_onProgressAnimationStatusChanged);
 
     _transferSpringControllers(
       from: manifest.controllingHero,
@@ -84,10 +79,13 @@ class _HeroineFlight {
     required _HeroineState to,
   }) {
     if (from == to) return;
-    to._linkRedirectedSpringControllers(
-      from._centerController!,
-      from._sizeController!,
-    );
+    if (from._centerController != null && from._sizeController != null) {
+      to._linkRedirectedSpringControllers(
+        from._centerController!,
+        from._sizeController!,
+      );
+    }
+
     from._unlinkSpringControllers();
   }
 
@@ -112,8 +110,7 @@ class _HeroineFlight {
 
     if (status.isAnimating) return;
 
-    manifest.routeAnimation
-        .removeStatusListener(_onProgressAnimationStatusChanged);
+    manifest.routeAnimation.removeStatusListener(_onProgressAnimationStatusChanged);
     handoverFlight();
   }
 
