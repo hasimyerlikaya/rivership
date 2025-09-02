@@ -79,13 +79,10 @@ class _HeroineFlight {
     required _HeroineState to,
   }) {
     if (from == to) return;
-    if (from._centerController != null && from._sizeController != null) {
-      to._linkRedirectedSpringControllers(
-        from._centerController!,
-        from._sizeController!,
-      );
-    }
-
+    to._linkRedirectedSpringControllers(
+      from._centerController!,
+      from._sizeController!,
+    );
     from._unlinkSpringControllers();
   }
 
