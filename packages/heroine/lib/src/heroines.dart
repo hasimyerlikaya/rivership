@@ -614,16 +614,12 @@ class HeroineController extends NavigatorObserver {
     });
 
     // Create flights in the correct order
+    //* Modified to create fresh flight every time
     for (final manifest in manifests) {
-      final existingFlight = manifestsToExistingFlights[manifest];
-      if (existingFlight != null) {
-        existingFlight.divert(manifest);
-      } else {
-        _flights[manifest.tag!] = _HeroineFlight(
-          manifest,
-          () => _handleFlightEnded(manifest),
-        )..startFlight();
-      }
+      _flights[manifest.tag!] = _HeroineFlight(
+        manifest,
+        () => _handleFlightEnded(manifest),
+      )..startFlight();
     }
 
     // The remaining entries in toHeroes are those failed to participate in a
@@ -653,7 +649,8 @@ class HeroineController extends NavigatorObserver {
   }
 
   void _handleFlightEnded(_FlightManifest manifest) {
-    _flights.remove(manifest.tag)?.dispose();
+    //* Disabled to prevent user abort during the flight
+    // _flights.remove(manifest.tag)?.dispose();
   }
 
   /// Releases resources.
