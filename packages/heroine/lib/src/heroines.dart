@@ -213,15 +213,15 @@ class _HeroineState extends State<Heroine> with TickerProviderStateMixin {
     _placeholderSize = null;
     if (!mounted) return;
 
-    if (this == _manifest?.toHero) {
-      _manifest = null;
-      _sleightOfHand = null;
-    } else {
-      setState(() {
-        _manifest = null;
-        _sleightOfHand = null;
-      });
-    }
+    // if (this == _manifest?.toHero) {
+    //   _manifest = null;
+    //   _sleightOfHand = null;
+    // } else {
+    //   setState(() {
+    //     _manifest = null;
+    //     _sleightOfHand = null;
+    //   });
+    // }
   }
 
   @override
