@@ -274,6 +274,11 @@ class _SleightOfHandBuilder extends StatelessWidget {
         animation:
             sleightOfHand?.centerController ?? const AlwaysStoppedAnimation(0),
         builder: (context, child) {
+          final ignoreHeight = sleightOfHand?.targetSize.height ?? 0;
+          final sizeHeight = sleightOfHand?.sizeY ?? 0;
+
+          final ignore = sizeHeight <= ignoreHeight - 50;
+
           return Transform.translate(
             offset: sleightOfHand?.offset ?? Offset.zero,
             child: SizedBox.fromSize(
@@ -293,7 +298,10 @@ class _SleightOfHandBuilder extends StatelessWidget {
                         enabled: !offstage,
                         child: KeyedSubtree(
                           key: globalKey,
-                          child: child!,
+                          child: IgnorePointer(
+                            ignoring: ignore,
+                            child: child,
+                          ),
                         ),
                       ),
                     ),
