@@ -279,28 +279,28 @@ class _SleightOfHandBuilder extends StatelessWidget {
 
           final ignore = sizeHeight <= ignoreHeight - 50;
 
-          return Transform.translate(
-            offset: sleightOfHand?.offset ?? Offset.zero,
-            child: SizedBox.fromSize(
-              size: size,
-              child: OverflowBox(
-                maxHeight: double.infinity,
-                maxWidth: double.infinity,
-                child: Center(
-                  child: SizedBox.fromSize(
-                    size: Size(
-                      sleightOfHand?.sizeX ?? size.width,
-                      sleightOfHand?.sizeY ?? size.height,
-                    ),
-                    child: Offstage(
-                      offstage: offstage,
-                      child: TickerMode(
-                        enabled: !offstage,
-                        child: KeyedSubtree(
-                          key: globalKey,
-                          child: IgnorePointer(
-                            ignoring: ignore,
-                            child: child,
+          return IgnorePointer(
+            ignoring: ignore,
+            child: Transform.translate(
+              offset: sleightOfHand?.offset ?? Offset.zero,
+              child: SizedBox.fromSize(
+                size: size,
+                child: OverflowBox(
+                  maxHeight: double.infinity,
+                  maxWidth: double.infinity,
+                  child: Center(
+                    child: SizedBox.fromSize(
+                      size: Size(
+                        sleightOfHand?.sizeX ?? size.width,
+                        sleightOfHand?.sizeY ?? size.height,
+                      ),
+                      child: Offstage(
+                        offstage: offstage,
+                        child: TickerMode(
+                          enabled: !offstage,
+                          child: KeyedSubtree(
+                            key: globalKey,
+                            child: child!,
                           ),
                         ),
                       ),
