@@ -1,3 +1,21 @@
+## 1.0.1
+
+ - **FIX**: velocity scaling when overdragging with resistance.
+ - **DOCS**: updated README.
+
+## 1.0.0
+
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
+## 1.0.0-dev.10
+
+> Note: This release has breaking changes.
+
+ - **FIX**: accept any motion in `SingleMotionController`.
+ - **FIX**: Motion changes in sequences are now picked up correctly.
+ - **BREAKING** **REFACTOR**: rename `TrimmedMotion` parameters and `MotionTrimming` extension methods to be more intuitive.
+ - **BREAKING** **FEAT**: on phase changed callback now returns the full transition.
+
 ## 1.0.0-dev.9
 
  - **FIX**: import internal from package:meta again.

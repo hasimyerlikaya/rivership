@@ -56,6 +56,22 @@ final stupidSimpleSheetRoutes = [
       ),
     ),
   ),
+  NamedRouteDef(
+    name: 'Snapping Sheet',
+    path: 'snapping-sheet',
+    builder: (context, data) => _SnappingSheetContent(),
+    type: RouteType.custom(
+      customRouteBuilder: <T>(context, child, page) =>
+          StupidSimpleCupertinoSheetRoute<T>(
+        settings: page,
+        snappingConfig: SheetSnappingConfig.relative(
+          [0.5, 1.0],
+          initialSnap: .5,
+        ),
+        child: child,
+      ),
+    ),
+  ),
 ];
 
 final router = RootStackRouter.build(
@@ -96,6 +112,10 @@ class MotorExample extends StatelessWidget {
               child: Text('Resizing Sheet'),
               onPressed: () => context.navigateTo(NamedRoute('Small Sheet')),
             ),
+            CupertinoButton.filled(
+              child: Text('Snapping Sheet'),
+              onPressed: () => context.navigateTo(NamedRoute('Snapping Sheet')),
+            ),
           ],
         ),
       ),
@@ -119,12 +139,49 @@ class _CupertinoSheetContent extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => CupertinoListTile(
-                title: Text('Item #$index'),
+          SliverSafeArea(
+              sliver: SliverMainAxisGroup(slivers: [
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => CupertinoListTile(
+                  title: Text('Item #$index'),
+                ),
+                childCount: 50,
               ),
-              childCount: 50,
+            ),
+            SliverToBoxAdapter(
+              child: CupertinoTextField(),
+            ),
+          ]))
+        ],
+      ),
+    );
+  }
+}
+
+class _SnappingSheetContent extends StatelessWidget {
+  const _SnappingSheetContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      child: CustomScrollView(
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: Text('Sheet'),
+            leading: CupertinoButton(
+              child: Text("Close"),
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          SliverFillRemaining(
+            child: Center(
+              child: CupertinoButton.tinted(
+                child: Text('Another'),
+                onPressed: () =>
+                    context.pushRoute(NamedRoute('Snapping Sheet')),
+              ),
             ),
           ),
         ],
@@ -164,7 +221,7 @@ class _PagedSheetContent extends StatelessWidget {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

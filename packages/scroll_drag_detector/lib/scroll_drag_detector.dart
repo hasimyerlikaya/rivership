@@ -146,9 +146,8 @@ class _ScrollDragDetectorState extends State<ScrollDragDetector> {
 
   var _scrollStartedAtTop = false;
 
-  bool get canDrag => _scrollStartedAtTop || !widget.onlyDragWhenScrollWasAtTop;
-
   DragStartDetails? _dragStartDetails;
+  late ScrollMetrics _startMetrics;
 
   bool get hasVertical =>
       widget.onVerticalDragStart != null ||
@@ -196,6 +195,7 @@ class _ScrollDragDetectorState extends State<ScrollDragDetector> {
                   ? _DraggingScrollBehavior(
                       parent: ScrollConfiguration.of(context),
                       axes: dragAxes,
+                      startMetrics: _startMetrics,
                     )
                   : ScrollConfiguration.of(context),
               child: child!,
@@ -211,26 +211,23 @@ class _ScrollDragDetectorState extends State<ScrollDragDetector> {
     if (!dragAxes.contains(notification.metrics.axis)) return true;
 
     switch (notification) {
-      case ScrollStartNotification(:final dragDetails):
+      case ScrollStartNotification(:final dragDetails, :final metrics):
         _scrollStartedAtTop = notification.metrics.extentBefore <= kTouchSlop;
-
         _dragStartDetails = dragDetails;
+        _startMetrics = metrics;
       case ScrollUpdateNotification(
           :final metrics,
           :final dragDetails,
         ):
-        if (!canDrag) return true;
-        if (dragDetails != null) {
+        if (dragDetails != null &&
+            _isScrollActuallyDrag(metrics, dragDetails)) {
           // When we are overscrolling at the top
-          if (metrics.extentBefore <= 0 &&
-              dragDetails.primaryDelta != null &&
-              dragDetails.primaryDelta! > 0) {
-            if (!_isDragging.value) {
-              _isDragging.value = true;
-              _handleDragStart(metrics.axis);
-            } else {
-              _handleDragUpdate(metrics.axis, dragDetails);
-            }
+
+          if (!_isDragging.value) {
+            _isDragging.value = true;
+            _handleDragStart(metrics.axis);
+          } else {
+            _handleDragUpdate(metrics.axis, dragDetails);
           }
         }
       case OverscrollNotification(
@@ -238,23 +235,21 @@ class _ScrollDragDetectorState extends State<ScrollDragDetector> {
           :final dragDetails,
           :final velocity,
         ):
-        if (!canDrag) return true;
-        if (dragDetails != null) {
+        if (dragDetails != null &&
+            _isScrollActuallyDrag(metrics, dragDetails)) {
           // When we are overscrolling at the top
-          if (metrics.extentBefore <= 0) {
-            if (!_isDragging.value) {
-              _isDragging.value = true;
-              _handleDragStart(metrics.axis);
-            } else if (dragDetails.primaryDelta case final delta?
-                when delta < 0 && !widget.scrollableCanMoveBack) {
-              _isDragging.value = false;
-              _handleDragEnd(metrics.axis, DragEndDetails());
-            } else {
-              _handleDragUpdate(metrics.axis, dragDetails);
-            }
+
+          if (!_isDragging.value) {
+            _isDragging.value = true;
+            _handleDragStart(metrics.axis);
+          } else if (dragDetails.primaryDelta case final delta?
+              when delta < 0 && !widget.scrollableCanMoveBack) {
+            _isDragging.value = false;
+            _handleDragEnd(metrics.axis, DragEndDetails());
+          } else {
+            _handleDragUpdate(metrics.axis, dragDetails);
           }
         } else {
-          if (!canDrag) return true;
           if (_isDragging.value) {
             _isDragging.value = false;
             _handleDragEnd(
@@ -273,8 +268,6 @@ class _ScrollDragDetectorState extends State<ScrollDragDetector> {
         }
 
       case final ScrollEndNotification n:
-        if (!canDrag) return true;
-
         if (_isDragging.value) {
           _isDragging.value = false;
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -285,6 +278,36 @@ class _ScrollDragDetectorState extends State<ScrollDragDetector> {
         }
     }
     return true;
+  }
+
+  /// Whether it is possible that the user could intend to drag backward
+  /// (towards the direction of the leading edge).
+  ///
+  /// If `onlyDragWhenScrollWasAtTop` is true, this is only possible if the
+  /// scroll started at the top.
+  bool get _canDragBackward =>
+      _scrollStartedAtTop || !widget.onlyDragWhenScrollWasAtTop;
+
+  /// Whether it is possible that the user could intend to drag forward
+  /// (towards the direction of the trailing edge).
+  bool get _canDragForward => widget.scrollableCanMoveBack;
+
+  /// Whether the given scroll metrics and drag details indicate that the user
+  /// is trying to drag instead of scroll.
+  bool _isScrollActuallyDrag(ScrollMetrics metrics, DragUpdateDetails details) {
+    // We are at the top and trying to scroll further up
+    if (metrics.extentBefore <= 0 &&
+        details.primaryDelta != null &&
+        details.primaryDelta! > 0) {
+      return _canDragBackward;
+    }
+
+    // We aren't at the top and can move further forward
+    if (details.primaryDelta != null && details.primaryDelta! < 0) {
+      return _canDragForward;
+    }
+
+    return false;
   }
 
   void _handleDragStart(Axis axis) {
@@ -316,35 +339,49 @@ class _ScrollDragDetectorState extends State<ScrollDragDetector> {
 
 class _DraggingScrollBehavior extends ScrollBehavior {
   const _DraggingScrollBehavior({
+    required this.startMetrics,
     required this.parent,
     required this.axes,
   });
+
+  final ScrollMetrics startMetrics;
 
   final ScrollBehavior parent;
 
   final Set<Axis> axes;
 
+  bool doesApplyToDetails(ScrollableDetails details) {
+    return switch (details.direction) {
+      AxisDirection.up || AxisDirection.down => axes.contains(Axis.vertical),
+      AxisDirection.left ||
+      AxisDirection.right =>
+        axes.contains(Axis.horizontal),
+    };
+  }
+
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) =>
-      _OverscrollScrollPhysics(axes: axes);
+      _OverscrollScrollPhysics(axes: axes, startMetrics: startMetrics);
 
   @override
   Widget buildOverscrollIndicator(
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) {
-    return child;
-  }
+  ) =>
+      doesApplyToDetails(details)
+          ? child
+          : parent.buildOverscrollIndicator(context, child, details);
 
   @override
   Widget buildScrollbar(
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) {
-    return parent.buildScrollbar(context, child, details);
-  }
+  ) =>
+      doesApplyToDetails(details)
+          ? child
+          : parent.buildScrollbar(context, child, details);
 
   @override
   Set<PointerDeviceKind> get dragDevices => parent.dragDevices;
@@ -352,49 +389,48 @@ class _DraggingScrollBehavior extends ScrollBehavior {
   @override
   ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(
     BuildContext context,
-  ) {
-    return parent.getKeyboardDismissBehavior(context);
-  }
+  ) =>
+      parent.getKeyboardDismissBehavior(context);
 
   @override
-  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
-    return parent.getMultitouchDragStrategy(context);
-  }
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) =>
+      parent.getMultitouchDragStrategy(context);
 
   @override
-  TargetPlatform getPlatform(BuildContext context) {
-    return parent.getPlatform(context);
-  }
+  TargetPlatform getPlatform(BuildContext context) =>
+      parent.getPlatform(context);
 
   @override
   Set<LogicalKeyboardKey> get pointerAxisModifiers =>
       parent.pointerAxisModifiers;
 
   @override
-  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-    return parent.velocityTrackerBuilder(context);
-  }
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) =>
+      parent.velocityTrackerBuilder(context);
 
   @override
-  bool shouldNotify(covariant ScrollBehavior oldDelegate) {
-    return parent.shouldNotify(oldDelegate);
-  }
+  bool shouldNotify(covariant ScrollBehavior oldDelegate) =>
+      parent.shouldNotify(oldDelegate);
 }
 
 /// Scroll physics that don't allow moving from the current position and just
 /// always send an overscroll notification.
-class _OverscrollScrollPhysics extends ClampingScrollPhysics {
+class _OverscrollScrollPhysics extends ScrollPhysics {
   const _OverscrollScrollPhysics({
     required this.axes,
+    required this.startMetrics,
     super.parent,
   });
 
   final Set<Axis> axes;
 
+  final ScrollMetrics startMetrics;
+
   @override
   _OverscrollScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return _OverscrollScrollPhysics(
       axes: axes,
+      startMetrics: startMetrics,
       parent: buildParent(ancestor),
     );
   }
@@ -406,7 +442,6 @@ class _OverscrollScrollPhysics extends ClampingScrollPhysics {
   ) {
     if (axes.contains(position.axis)) return value - position.pixels;
 
-    return parent?.applyBoundaryConditions(position, value) ??
-        super.applyBoundaryConditions(position, value);
+    return super.applyBoundaryConditions(position, value);
   }
 }
