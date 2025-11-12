@@ -213,6 +213,7 @@ class _HeroineState extends State<Heroine> with TickerProviderStateMixin {
     _placeholderSize = null;
     if (!mounted) return;
 
+    //* [Haşim] Disabled to prevent unnecessary refresh
     // if (this == _manifest?.toHero) {
     //   _manifest = null;
     //   _sleightOfHand = null;
@@ -279,6 +280,7 @@ class _SleightOfHandBuilder extends StatelessWidget {
 
           final ignore = sizeHeight <= ignoreHeight - 50;
 
+          //* [Haşim] Added IgnorePointer to prevent tabs while flighting
           return IgnorePointer(
             ignoring: ignore,
             child: Transform.translate(
@@ -622,7 +624,7 @@ class HeroineController extends NavigatorObserver {
     });
 
     // Create flights in the correct order
-    //* Modified to create fresh flight every time
+    //* [Haşim] Modified to create fresh flight every time
     for (final manifest in manifests) {
       _flights[manifest.tag!] = _HeroineFlight(
         manifest,
@@ -657,7 +659,7 @@ class HeroineController extends NavigatorObserver {
   }
 
   void _handleFlightEnded(_FlightManifest manifest) {
-    //* Disabled to prevent user abort during the flight
+    //* [Haşim] Disabled to prevent user abort during the flight
     // _flights.remove(manifest.tag)?.dispose();
   }
 
