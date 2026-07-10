@@ -351,15 +351,19 @@ class HeroineController extends NavigatorObserver {
 
     // Create flights in the correct order
     for (final spec in specs) {
-      final existingFlight = specsToExistingFlights[spec];
-      if (existingFlight != null) {
-        existingFlight.divert(spec);
-      } else {
-        _flights[spec.tag!] = _FlightController(
-          spec,
-          () => _handleFlightEnded(spec),
-        )..startFlight();
-      }
+      // final existingFlight = specsToExistingFlights[spec];
+      // if (existingFlight != null) {
+      //   existingFlight.divert(spec);
+      // } else {
+      //   _flights[spec.tag!] = _FlightController(
+      //     spec,
+      //     () => _handleFlightEnded(spec),
+      //   )..startFlight();
+      // }
+      _flights[spec.tag!] = _FlightController(
+        spec,
+        () => _handleFlightEnded(spec),
+      )..startFlight();
     }
 
     // The remaining entries in toHeroes are those failed to participate in a
@@ -389,7 +393,7 @@ class HeroineController extends NavigatorObserver {
   }
 
   void _handleFlightEnded(_FlightSpec spec) {
-    _flights.remove(spec.tag)?.dispose();
+    // _flights.remove(spec.tag)?.dispose();
   }
 
   /// Releases resources.
