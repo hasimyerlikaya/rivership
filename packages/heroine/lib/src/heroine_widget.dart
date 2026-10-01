@@ -335,8 +335,8 @@ class _HeroineState extends State<Heroine> with TickerProviderStateMixin {
                   child: Center(
                     child: SizedBox.fromSize(
                       size: Size(
-                        landing.sizeX,
-                        landing.sizeY,
+                        math.max(0, landing.sizeX),
+                        math.max(0, landing.sizeY),
                       ),
                       child: child,
                     ),
@@ -437,7 +437,7 @@ class _ToLanding extends _Status {
   Offset get offset =>
       controller.value.boundingBox.center - target.boundingBox.center;
 
-  double get sizeX => controller.value.boundingBox.width;
+  double get sizeX => math.max(0, controller.value.boundingBox.width);
 
-  double get sizeY => controller.value.boundingBox.height;
+  double get sizeY => math.max(0, controller.value.boundingBox.height);
 }
