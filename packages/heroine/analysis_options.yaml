@@ -6,3 +6,6 @@ include: package:lintervention/analysis_options.yaml
 formatter:
   page_width: 80
   trailing_commas: preserve
+analyzer:
+  exclude:
+    - build/**
