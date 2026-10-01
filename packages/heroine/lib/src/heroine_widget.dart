@@ -325,6 +325,10 @@ class _HeroineState extends State<Heroine> with TickerProviderStateMixin {
         return AnimatedBuilder(
           animation: landing.controller,
           builder: (context, child) {
+            // Once it has settled, the heroine is just its child again, so it can change size freely (a bar that
+            // grows with the text typed into it) instead of staying at the size it landed with.
+            if (!landing.controller.isAnimating) return child!;
+
             return Transform.translate(
               offset: landing.offset,
               child: SizedBox.fromSize(
