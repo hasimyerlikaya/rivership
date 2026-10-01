@@ -258,11 +258,11 @@ class _FlightController {
       animation: _spec.routeAnimation,
       builder: (context, child) => Positioned(
         top: controller.value.boundingBox.center.dy -
-            controller.value.boundingBox.size.height / 2,
+            math.max(0, controller.value.boundingBox.size.height) / 2,
         left: controller.value.boundingBox.center.dx -
-            controller.value.boundingBox.size.width / 2,
-        width: controller.value.boundingBox.size.width,
-        height: controller.value.boundingBox.size.height,
+            math.max(0, controller.value.boundingBox.size.width) / 2,
+        width: math.max(0, controller.value.boundingBox.size.width),
+        height: math.max(0, controller.value.boundingBox.size.height),
         // TODO(timcreatedit): rotate here
         child: child!,
       ),

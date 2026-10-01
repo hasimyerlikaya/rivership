@@ -58,7 +58,12 @@ class _HeroineLocationConverter extends MotionConverter<HeroineLocation> {
     final rect = const RectMotionConverter().denormalize(values.sublist(0, 4));
     final rotation = values[4];
     return HeroineLocation(
-      boundingBox: rect,
+      boundingBox: Rect.fromLTWH(
+        rect.left,
+        rect.top,
+        math.max(0, rect.width),
+        math.max(0, rect.height),
+      ),
       rotation: rotation,
     );
   }
