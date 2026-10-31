@@ -78,16 +78,31 @@ abstract class SimpleShuttleBuilder extends HeroineShuttleBuilder {
         ? animation.value
         : 1 - animation.value;
 
+    // A hero can leave the tree during its flight: a lazy list drops a row once
+    // its shrinking page puts it off screen. The flight goes on with the widget
+    // it last showed.
+    var fromHero = fromHeroContext.widget;
+    var toHero = toHeroContext.widget;
+
+    void followHeroes() {
+      if (fromHeroContext.mounted) fromHero = fromHeroContext.widget;
+      if (toHeroContext.mounted) toHero = toHeroContext.widget;
+    }
+
     if (toMediaQueryData == null || fromMediaQueryData == null) {
       return AnimatedBuilder(
         animation: animation,
-        builder: (BuildContext context, Widget? _) => buildHero(
-          flightContext: flightContext,
-          fromHero: fromHeroContext.widget,
-          toHero: toHeroContext.widget,
-          valueFromTo: remapValue(),
-          flightDirection: flightDirection,
-        ),
+        builder: (BuildContext context, Widget? _) {
+          followHeroes();
+
+          return buildHero(
+            flightContext: flightContext,
+            fromHero: fromHero,
+            toHero: toHero,
+            valueFromTo: remapValue(),
+            flightDirection: flightDirection,
+          );
+        },
       );
     }
 
@@ -96,26 +111,30 @@ abstract class SimpleShuttleBuilder extends HeroineShuttleBuilder {
 
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget? _) => MediaQuery(
-        data: toMediaQueryData.copyWith(
-          padding: (flightDirection == HeroFlightDirection.push)
-              ? EdgeInsetsTween(
-                  begin: fromHeroPadding,
-                  end: toHeroPadding,
-                ).evaluate(animation)
-              : EdgeInsetsTween(
-                  begin: toHeroPadding,
-                  end: fromHeroPadding,
-                ).evaluate(animation),
-        ),
-        child: buildHero(
-          flightContext: flightContext,
-          fromHero: fromHeroContext.widget,
-          toHero: toHeroContext.widget,
-          valueFromTo: remapValue(),
-          flightDirection: flightDirection,
-        ),
-      ),
+      builder: (BuildContext context, Widget? _) {
+        followHeroes();
+
+        return MediaQuery(
+          data: toMediaQueryData.copyWith(
+            padding: (flightDirection == HeroFlightDirection.push)
+                ? EdgeInsetsTween(
+                    begin: fromHeroPadding,
+                    end: toHeroPadding,
+                  ).evaluate(animation)
+                : EdgeInsetsTween(
+                    begin: toHeroPadding,
+                    end: fromHeroPadding,
+                  ).evaluate(animation),
+          ),
+          child: buildHero(
+            flightContext: flightContext,
+            fromHero: fromHero,
+            toHero: toHero,
+            valueFromTo: remapValue(),
+            flightDirection: flightDirection,
+          ),
+        );
+      },
     );
   }
 }
