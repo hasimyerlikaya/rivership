@@ -242,6 +242,11 @@ class _FlightController {
 
   /// Builds the overlay widget showing the flying hero.
   Widget _buildOverlay(BuildContext context) {
+    // Rebuilt after a hero left the tree: nothing is left to show for it.
+    if (!_spec.fromHero.mounted || !_spec.toHero.mounted) {
+      return const SizedBox.shrink();
+    }
+
     final shuttle = _spec.shuttleBuilder(
       context,
       _spec.routeAnimation,
